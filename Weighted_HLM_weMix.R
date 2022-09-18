@@ -11,7 +11,10 @@ library(tidyverse)
 # Read data 
 ###################################
 
-sdf <- readPISA(path = "C:/Users/bergm/OneDrive/Dokumente/Applied Data Science/05_Frühjahr 2022/Project Consulting Course/Data/PISA/2018",countries="DEU")
+sdf <- readPISA(path = "C:/Users/bergm/OneDrive/Dokumente/Applied Data Science/05_Fr?hjahr 2022/Project Consulting Course/Data/PISA/2018",countries="DEU")
+
+#ISR
+sdf <- readPISA(path = "C:/Users/isr/Desktop/Training IPSDS/Master project/pisa2018/data",countries="DEU")
 
 
 global.scales <- c("GCSELFEFF",#Self-efficacy regarding global issues (WLE)
@@ -54,7 +57,7 @@ control.vars <- str_to_lower(control.vars)
 pisa.sel <- EdSurvey::getData(data = sdf,
                               varnames = c(id.vars,wt.vars,global.scales,control.vars,pv),
                               omittedLevels = F, # Do not drop omitted levels
-                              returnJKreplicates = F) # don´t return replicate weights
+                              returnJKreplicates = F) # don?t return replicate weights
 
 # Complete case analysis - delete cases with missing values
 omitted2018 <- getAttributes(sdf,'omittedLevels')
