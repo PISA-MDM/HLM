@@ -6,7 +6,7 @@ library(haven)
 library(tidyverse)
 library(srvyr)
 library(survey)
-library(jtools)
+library(sjPlot)
 library(WeMix)
 library(lme4)
 library(flexplot)
@@ -51,7 +51,7 @@ write_sav(data = pisa.merged, path = 'pisa.merged.sav')
 
 ###################################################
 # Code to read merged dataset
-# pisa.merged <- read_spss('pisa.merged.sav')
+pisa.merged <- read_spss('pisa.merged.sav')
 
 
 global.scales <- c("GCSELFEFF",#Self-efficacy regarding global issues (WLE)
@@ -116,8 +116,16 @@ pisa.subset <- pisa.subset %>% mutate(
 
 
 
-# Alternative use WeMix directly
+# Using WeMix for weighted Null-model
 # School weight provided
-baseline.wemix <- mix(PV1READ ~ 1 |CNTSCHID,  data = pisa.data, 
+baseline.wemix <- mix(PV1READ ~ 1 |CNTSCHID,  data = pisa.subset, 
                       weights = c("DUMMYWT","W_SCHGRNRABWT"))
 summary(baseline.wemix)
+
+
+# Null model
+baseline.w <- lmer(PV1READ ~ 1 |CNTSCHID,  data = pisa.subset,
+                   REML = F,weights = W_SCHGRNRABWT)
+summary(baseline.w) 
+estimates(baseline.w) # from flexplot
+tab_model(baseline.w, show.r2 = F) # from sjPlot
