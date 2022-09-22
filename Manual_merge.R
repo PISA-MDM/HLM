@@ -119,12 +119,42 @@ pisa.subset <- pisa.subset %>% mutate(
 # Checking Null-models
 ############################
 
-
 # Using WeMix for weighted Null-model
-# School weight provided
+# Dummy and School weight provided
 baseline.wemix <- mix(PV1READ ~ 1 |CNTSCHID,  data = pisa.subset, 
                       weights = c("DUMMYWT","W_SCHGRNRABWT"))
 summary(baseline.wemix)
+
+
+
+
+# Using WeMix for weighted Null-model
+# Final student and School weight provided
+baseline.wemix <- mix(PV1READ ~ 1 |CNTSCHID,  data = pisa.subset, 
+                      weights = c("W_FSTUWT","W_SCHGRNRABWT"))
+summary(baseline.wemix)
+
+
+# Call:
+#   mix(formula = PV1READ ~ 1 | CNTSCHID, data = pisa.subset, weights = c("W_FSTUWT", 
+#                                                                         "W_SCHGRNRABWT"))
+# 
+# Variance terms:
+#   Level    Group        Name Variance Std. Error Std.Dev.
+# 2 CNTSCHID (Intercept)     6153      550.5    78.44
+# 1 Residual                 5794      140.3    76.12
+# Groups:
+#   Level    Group n size mean wgt sum wgt
+# 2 CNTSCHID    223    58.51   13047
+# 1      Obs   5451   134.82  734915
+# 
+# Fixed Effects:
+#   Estimate Std. Error t value
+# (Intercept)  467.384      6.176   75.68
+# 
+# lnl= -4251118.93 
+# Intraclass Correlation= 0.515
+
 
 
 # Null model
