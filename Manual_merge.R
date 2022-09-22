@@ -125,8 +125,26 @@ baseline.wemix <- mix(PV1READ ~ 1 |CNTSCHID,  data = pisa.subset,
                       weights = c("DUMMYWT","W_SCHGRNRABWT"))
 summary(baseline.wemix)
 
-
-
+# Call:
+#   mix(formula = PV1READ ~ 1 | CNTSCHID, data = pisa.subset, weights = c("DUMMYWT", 
+#                                                                         "W_SCHGRNRABWT"))
+# 
+# Variance terms:
+#   Level    Group        Name  Variance Std. Error  Std.Dev.
+# 2 CNTSCHID (Intercept) 5.247e-19  2.147e-18 7.244e-10
+# 1 Residual             1.129e+04  4.158e+02 1.063e+02
+# Groups:
+#   Level    Group n size mean wgt sum wgt
+# 2 CNTSCHID    223    58.51   13047
+# 1      Obs   5451     1.00    5451
+# 
+# Fixed Effects:
+#   Estimate Std. Error t value
+# (Intercept)  500.852      5.065   98.89
+# 
+# lnl= -33168.17 
+# Intraclass Correlation= 4.648e-23 
+# 
 
 # Using WeMix for weighted Null-model
 # Final student and School weight provided
