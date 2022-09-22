@@ -54,6 +54,7 @@ write_sav(data = pisa.merged, path = 'pisa.merged.sav')
 pisa.merged <- read_spss('pisa.merged.sav')
 
 
+# Select variables to create reduced dataset
 global.scales <- c("GCSELFEFF",#Self-efficacy regarding global issues (WLE)
                                                               "GCAWARE",#Student's awareness of global issues (WLE)
                                                               "PERSPECT",#Perspective-taking (WLE)
@@ -87,7 +88,8 @@ control.vars <- c("ST001D01T",#Grade
 
 
 
-pisa.subset <- pisa.merged %>% select(global.scales,control.vars,id.vars,pv,wt.vars, W_FSTURWT1:W_FSTURWT80)
+pisa.subset <- pisa.merged %>% 
+  select(global.scales,control.vars,id.vars,pv,wt.vars, W_FSTURWT1:W_FSTURWT80)
   
 
 pisa.subset$DUMMYWT <- 1
@@ -113,7 +115,9 @@ pisa.subset <- pisa.subset %>% mutate(
 
 
 
-
+###########################
+# Checking Null-models
+############################
 
 
 # Using WeMix for weighted Null-model
