@@ -313,7 +313,7 @@ model.comparison(control.unw, full.unw)
 
 # tab the 2 models
 tab_model(baseline.unw,gcselfeff.unw,control.unw, full.unw, show.r2 = FALSE)
-tab_model(baseline.unw,gcselfeff.unw,control.unw, full.unw, show.r2 = FALSE), file = "hlm_unweighted.doc")
+tab_model(baseline.unw,gcselfeff.unw,control.unw, full.unw, show.r2 = FALSE, file = "hlm_unweighted.doc")
 
 
 
