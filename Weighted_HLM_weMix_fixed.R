@@ -217,6 +217,8 @@ t <- pisa.sel2 %>% group_by(cntschid) %>% summarize(number_stu = n()) %>% ungrou
 summary(t$number_stu)
 sd(t$number_stu)
 
+
+# Create dummywt for HLM
 pisa.sel2$dummywt <- 1
 
 
@@ -225,7 +227,19 @@ pisa.sel2$dummywt <- 1
 ###########################################
 
 
+###########################################
+###### Analysis with unconditional weights
+###########################################
 
+
+
+### MISSING ####
+
+
+
+#########################################
+###### Analysis with schoolweight only #
+######################################
 
 
 ##################################
@@ -239,11 +253,12 @@ baseline.wemix <- mix(pv1read ~ 1 + (1|cntschid), data = pisa.sel2,
             weights = c("dummywt","w_schgrnrabwt"), cWeights = T)
 summary(baseline.wemix)
 
+waldTest(baseline.wemix, type = "beta")
 
 
 ##################################
-##### Simple model ################
-#############################
+##### Simple model ###############
+##################################
 
 
 # Model with Global competence as predictor
@@ -251,9 +266,13 @@ gcselfeff.wemix <- mix(pv1read ~ gcselfeff + (1|cntschid), data = pisa.sel2,
                  weights = c("dummywt","w_schgrnrabwt"), cWeights = T)
 summary(gcselfeff.wemix)
 
+help("waldTest")
+waldTest(gcselfeff.wemix, type = "beta")
+
+
 ##################################
-##### Control model ################
-#############################
+##### Control model ##############
+##################################
 
 control.wemix <-  mix(pv1read ~ st001d01t_ad + st004d01t + hisei  + immig + repeatgrade + progn_de +  avg_hisei + sc048q01na + (1|cntschid), 
                      data = pisa.sel2,
@@ -261,6 +280,11 @@ control.wemix <-  mix(pv1read ~ st001d01t_ad + st004d01t + hisei  + immig + repe
 
 
 summary(control.wemix)
+
+waldTest(control.wemix, type = "beta", coefs = "progn_deRealschule")
+waldTest(control.wemix, type = "beta", coefs = "progn_deSchule mit mehreren Bildungsgängen")
+waldTest(control.wemix, type = "beta", coefs = "repeatgradeREPEATED A  GRADE")
+
 
 
 ##################################
@@ -273,4 +297,6 @@ full.wemix <-  mix(pv1read ~ gcselfeff + st001d01t_ad + st004d01t + hisei  + imm
 
 
 summary(full.wemix)
+
+waldTest(full.wemix, type = "beta", coefs = "gcselfeff")
 
