@@ -220,7 +220,7 @@ for (i in 1:ncol(pisa.sel2)) {
 
 
 full.cases <- pisa.sel2
-length(full.cases$cntstuid) # 2034 obs
+length(full.cases$cntstuid) # 2989 obs
 
 # Number of schools
 length(unique(pisa.sel2$cntschid))
