@@ -16,24 +16,25 @@ library(jtools) # For plotting models only lme4
 
 # Path needs to be adjusted by user
 sdf <- readPISA(path = "C:/Users/bergm/OneDrive/Dokumente/Applied Data Science/05_Frühjahr 2022/Project Consulting Course/Data/PISA/2018",countries="DEU")
+#sdf <- readPISA(path = "C:/Users/isr/Desktop/Training IPSDS/Master project/pisa2018/data",countries="DEU")
 
 
-global.scales <- c("GCSELFEFF",#Self-efficacy regarding global issues (WLE)
-                   "GCAWARE",#Student's awareness of global issues (WLE)
-                   "PERSPECT",#Perspective-taking (WLE)
-                   "COGFLEX",#Cognitive flexibility/adaptability (WLE)
-                   "AWACOM",#Awareness of intercultural communication (WLE)
-                   "INTCULT",#Student's interest in learning about other cultures (WLE)
-                   "RESPECT",#Respect for people from other cultures (WLE)
-                   "GLOBMIND",#Global-mindedness (WLE)
-                   "ATTIMM")
+global.scales <- c("GCSELFEFF")#Self-efficacy regarding global issues (WLE)
+#  "GCAWARE",#Student's awareness of global issues (WLE)
+# "PERSPECT",#Perspective-taking (WLE)
+#  "COGFLEX",#Cognitive flexibility/adaptability (WLE)
+#  "AWACOM",#Awareness of intercultural communication (WLE)
+#  "INTCULT",#Student's interest in learning about other cultures (WLE)
+#  "RESPECT",#Respect for people from other cultures (WLE)
+#  "GLOBMIND",#Global-mindedness (WLE)
+#  "ATTIMM")
 global.scales <- str_to_lower(global.scales)
 
 pv <- c("PV1READ" , "PV2READ", "PV3READ", "PV4READ", "PV5READ" , "PV6READ", "PV7READ", "PV8READ", "PV9READ" , "PV10READ")
 pv <- str_to_lower(pv)
 
 
-id.vars <- c("cntryid","cnt","cntschid","cntstuid","bookid","wvarstrr","stratum")
+id.vars <- c("cntryid","cnt","cntschid","cntstuid")
 
 
 wt.vars <- c("w_fstuwt", #FINAL TRIMMED NONRESPONSE ADJUSTED STUDENT WEIGHT
@@ -42,12 +43,12 @@ wt.vars <- c("w_fstuwt", #FINAL TRIMMED NONRESPONSE ADJUSTED STUDENT WEIGHT
 
 control.vars <- c("ST001D01T",#Grade
                   "ST004D01T",#Student (Standardized) Gender
-                  "HISCED",#Highest Education of parents (ISCED)
+                  # "HISCED",#Highest Education of parents (ISCED)
                   "HISEI",#Highest International Socio-Economic Index of Occupational Status
-                  "PARED",#Index highest parental education in years of schooling
+                  #  "PARED",#Index highest parental education in years of schooling
                   "IMMIG",#Index Immigration status
-                  "ST127Q01TA",#Have you ever repeated a <grade>? At <ISCED 1>
-                  "ST127Q02TA",#Have you ever repeated a <grade>? At <ISCED 2>
+                  #  "ST127Q01TA",#Have you ever repeated a <grade>? At <ISCED 1>
+                  #  "ST127Q02TA",#Have you ever repeated a <grade>? At <ISCED 2>
                   "repeatgrade",
                   "progn",  # School classification
                   "SC048Q01NA") # Percentage <national modal grade for 15-year-olds>: Students whose <heritage language> is different from <test language
@@ -171,9 +172,18 @@ pisa.sel$st001d01t_ad <- relevel(pisa.sel$st001d01t_ad, ref="Grade 7-9")
 
 
 # calculate school hisei
-pisa.sel <- pisa.sel %>% group_by(cntschid) %>% mutate(avg_hisei = mean(hisei, na.rm = TRUE)) %>% ungroup()
+# hisei_gc = group-mean centered
+pisa.sel <- pisa.sel %>% group_by(cntschid) %>% mutate(avg_hisei = mean(hisei, na.rm = TRUE),
+                                                       hisei_gc = hisei - avg_hisei) %>% ungroup()
 
 
+# Check group mean centering
+pisa.hisei <- pisa.sel %>% select(hisei, avg_hisei, hisei_gc)
+
+# Show school average hisei
+pisa.sel %>% 
+  group_by(cntschid) %>% 
+  summarise(avg_hisei = mean(hisei, na.rm = TRUE)) %>% ungroup
 
 ##########################################################
 ######### Rebinding attributes to use EdSurvey functions
@@ -186,6 +196,7 @@ pisa.sel <- rebindAttributes(pisa.sel, sdf)
 
 summary2(data = pisa.sel, variable = "progn_de")
 summary2(data = pisa.sel, variable = "st001d01t_ad")
+summary2(data = pisa.sel, variable = "avg_hisei")
 # EdSurvey functions work fine
 
 
@@ -209,7 +220,7 @@ for (i in 1:ncol(pisa.sel2)) {
 
 
 full.cases <- pisa.sel2
-length(full.cases) # 2034 obs
+length(full.cases$cntstuid) # 2034 obs
 
 # Number of schools
 length(unique(pisa.sel2$cntschid))
@@ -218,6 +229,12 @@ length(unique(pisa.sel2$cntschid))
 t <- pisa.sel2 %>% group_by(cntschid) %>% summarize(number_stu = n()) %>% ungroup
 summary(t$number_stu)
 sd(t$number_stu)
+
+
+# Create dummywt for HLM
+pisa.sel2$dummywt <- 1
+
+
 
 
 ############################################
@@ -243,7 +260,7 @@ tab_model(baseline.unw, show.r2 = FALSE, file = "baseline.unw.doc") # from sjPlo
 
 # Visualize with flexplot
 visualize(baseline.unw, plot = "residuals")
-visualize(baseline.unw, sample = 150)
+visualize(baseline.unw, sample = 174, plot = "model")
 
 
 
@@ -254,7 +271,8 @@ estimates(gcselfeff.unw)
 tab_model(gcselfeff.unw, show.r2 = FALSE)
 
 # Visualize with flexplot
-visualize(gcselfeff.unw, sample = 150)
+visualize(gcselfeff.unw,  sample = 174, plot = "model")
+
 # Alternative to plot fitted vs resid
 plot(gcselfeff.unw)
 
@@ -274,7 +292,7 @@ estimates(control.unw)
 summary(control.unw)
 
 # Visualize with flexplot
-visualize(control.unw, sample = 150)
+#visualize(control.unw, sample = 174)
 
 # Alternative to plot fitted vs resid
 plot(control.unw)
@@ -296,7 +314,7 @@ summary(full.unw)
 
 
 # Visualize with flexplot
-visualize(full.unw, sample = 150)
+#visualize(full.unw, sample = 150)
 
 # Alternative to plot fitted vs resid
 plot(full.unw)
@@ -323,58 +341,58 @@ tab_model(baseline.unw,gcselfeff.unw,control.unw, full.unw, show.r2 = FALSE, fil
 #########################################################################
 #### Weighted analysis using lme4 with school weights
 #########################################################################
-
-# Null model
-baseline.w <- lmer(pv1read ~ 1 + (1|cntschid), data = pisa.sel,REML = F, weights = w_fstuwt)
-summary(baseline.w) 
-estimates(baseline.w) # from flexplot
-tab_model(baseline.w, show.r2 = F) # from sjPlot
-
-
-# Visualize model
-visualize(baseline.w, plot = "residuals")
-
-
-
-# gcselfeff
-gcselfeff.w <-  lmer(pv1read ~ gcselfeff + (1|cntschid), data = pisa.sel,REML = F, weights = w_schgrnrabwt)
-summary(gcselfeff.w)
-estimates(gcselfeff.w)
-tab_model(gcselfeff.w, show.r2 = F)
-
-
-##################################
-# Important model comparison
-model.comparison(baseline.w,gcselfeff.w)
-
-tab_model(baseline.w,gcselfeff.w , show.r2 = F)
-
-
-
-# Full model
-# Needs to be adjusted
-full.w <-  lmer(pv1read ~ gcselfeff + st001d01t + st004d01t + hisei + avg_hisei + immig + repeatgrade + progn + sc048q01na + (1|cntschid), data = pisa.sel,REML = F, weights = w_schgrnrabwt)
-
-estimates(full.w)
-summary(full.w)
-
-
-tab_model(baseline.w,gcselfeff.w,full.w, show.r2 = F)
-tab_model(baseline.w,gcselfeff.w,full.w, show.r2 = F, file = "hlm_lme_weighted.doc")
-
-
-# Model comparison
-model.comparison(gcselfeff.w,full.w)
-
-
-# Tab unweighted vs weighted models
-tab_model(baseline.unw,baseline.w,show.r2 = F, file = "baseline_unw_lme_weighted.doc")
-tab_model(gcselfeff.unw,gcselfeff.w,show.r2 = F, file = "gcseleff_unw_lme_weighted.doc")
-tab_model(full.unw,full.w,show.r2 = F, file = "full_unw_lme_weighted.doc")
-
-
-
-
-
-
-
+# 
+# # Null model
+# baseline.w <- lmer(pv1read ~ 1 + (1|cntschid), data = pisa.sel,REML = F, weights = w_fstuwt)
+# summary(baseline.w) 
+# estimates(baseline.w) # from flexplot
+# tab_model(baseline.w, show.r2 = F) # from sjPlot
+# 
+# 
+# # Visualize model
+# visualize(baseline.w, plot = "residuals")
+# 
+# 
+# 
+# # gcselfeff
+# gcselfeff.w <-  lmer(pv1read ~ gcselfeff + (1|cntschid), data = pisa.sel,REML = F, weights = w_schgrnrabwt)
+# summary(gcselfeff.w)
+# estimates(gcselfeff.w)
+# tab_model(gcselfeff.w, show.r2 = F)
+# 
+# 
+# ##################################
+# # Important model comparison
+# model.comparison(baseline.w,gcselfeff.w)
+# 
+# tab_model(baseline.w,gcselfeff.w , show.r2 = F)
+# 
+# 
+# 
+# # Full model
+# # Needs to be adjusted
+# full.w <-  lmer(pv1read ~ gcselfeff + st001d01t + st004d01t + hisei + avg_hisei + immig + repeatgrade + progn + sc048q01na + (1|cntschid), data = pisa.sel,REML = F, weights = w_schgrnrabwt)
+# 
+# estimates(full.w)
+# summary(full.w)
+# 
+# 
+# tab_model(baseline.w,gcselfeff.w,full.w, show.r2 = F)
+# tab_model(baseline.w,gcselfeff.w,full.w, show.r2 = F, file = "hlm_lme_weighted.doc")
+# 
+# 
+# # Model comparison
+# model.comparison(gcselfeff.w,full.w)
+# 
+# 
+# # Tab unweighted vs weighted models
+# tab_model(baseline.unw,baseline.w,show.r2 = F, file = "baseline_unw_lme_weighted.doc")
+# tab_model(gcselfeff.unw,gcselfeff.w,show.r2 = F, file = "gcseleff_unw_lme_weighted.doc")
+# tab_model(full.unw,full.w,show.r2 = F, file = "full_unw_lme_weighted.doc")
+# 
+# 
+# 
+# 
+# 
+# 
+# 
