@@ -3,6 +3,7 @@
 
 library(EdSurvey)
 library(lme4)
+library(nlme)
 library(WeMix)
 library(flexplot) # get statistics for hlm
 library(tidyverse)
@@ -241,8 +242,26 @@ pisa.sel2$dummywt <- 1
 #### End of data preparation ##############
 ###########################################
 
+# intercept only model
+intercept.only <- gls(pv1read~1, data = pisa.sel2, method = "ML")
 
-
+summary(intercept.only)
+# Generalized least squares fit by maximum likelihood
+# Model: pv1read ~ 1 
+# Data: pisa.sel2 
+# AIC     BIC   logLik
+# 35893.39 35905.4 -17944.7
+# 
+# Coefficients:
+#   Value Std.Error  t-value p-value
+# (Intercept) 525.7778  1.792229 293.3653       0
+# 
+# Standardized residuals:
+#   Min          Q1         Med          Q3         Max 
+# -3.34700191 -0.69806320  0.05155978  0.73612064  2.91026104 
+# 
+# Residual standard error: 97.96791 
+# Degrees of freedom: 2989 total; 2988 residual
 
 
 # Null model
