@@ -303,8 +303,10 @@ tab_model(baseline.unw,gcselfeff.unw, show.r2 = FALSE)
 
 
 
-
+#######################
 # Control variables
+######################
+# Raw scores of hisei
 control.unw <-  lmer(pv1read ~ progn_de + st001d01t_ad + st004d01t + hisei + avg_hisei + immig + repeatgrade +  sc048q01na + (1|cntschid), 
                   data = pisa.sel2)
 estimates(control.unw)
@@ -316,30 +318,55 @@ summary(control.unw)
 # Alternative to plot fitted vs resid
 plot(control.unw)
 
-
 ##################################
 # Important model comparison
 model.comparison(baseline.unw,control.unw)
 
 
+######################
+# group centered hisei
+######################
+
+control.centered <-  lmer(pv1read ~ progn_de + st001d01t_ad + st004d01t + hisei_gc + avg_hisei + immig + repeatgrade +  sc048q01na + (1|cntschid), 
+                     data = pisa.sel2)
+estimates(control.centered)
+summary(control.centered)
+
+# Alternative to plot fitted vs resid
+plot(control.centered)
+
+##################################
+# Important model comparison
+model.comparison(baseline.unw,control.centered)
 
 
 
+###################
 # Full models
+###################
+# Raw scores of hisei
 full.unw <-  lmer(pv1read ~ gcselfeff + progn_de + st001d01t_ad + st004d01t + hisei + avg_hisei + immig + repeatgrade +  sc048q01na + (1|cntschid), 
                   data = pisa.sel2)
 estimates(full.unw)
 summary(full.unw)
 
 
-# Visualize with flexplot
-#visualize(full.unw, sample = 150)
-
 # Alternative to plot fitted vs resid
 plot(full.unw)
 
+######################
+# group centered hisei
+######################
+
+# Raw scores of hisei
+full.unw.centered <-  lmer(pv1read ~ gcselfeff + progn_de + st001d01t_ad + st004d01t + hisei_gc + avg_hisei + immig + repeatgrade +  sc048q01na + (1|cntschid), 
+                           data = pisa.sel2)
+estimates(full.unw.centered)
+summary(full.unw.centered)
 
 
+# Alternative to plot fitted vs resid
+plot(full.unw.centered
 
 
 ##################################
@@ -348,7 +375,7 @@ model.comparison(control.unw, full.unw)
 
 
 
-# tab the 2 models
+# tab models
 tab_model(baseline.unw,gcselfeff.unw,control.unw, full.unw, show.r2 = FALSE)
 tab_model(baseline.unw,gcselfeff.unw,control.unw, full.unw, show.r2 = FALSE, file = "hlm_unweighted.doc")
 
