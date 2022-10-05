@@ -341,6 +341,7 @@ model.comparison(baseline.unw,control.centered)
 
 
 
+
 ###################
 # Full models
 ###################
@@ -354,6 +355,13 @@ summary(full.unw)
 # Alternative to plot fitted vs resid
 plot(full.unw)
 
+##################################
+# Important model comparison
+model.comparison(control.unw, full.unw)
+
+
+
+
 ######################
 # group centered hisei
 ######################
@@ -364,20 +372,25 @@ full.unw.centered <-  lmer(pv1read ~ gcselfeff + progn_de + st001d01t_ad + st004
 estimates(full.unw.centered)
 summary(full.unw.centered)
 
-
-# Alternative to plot fitted vs resid
-plot(full.unw.centered
-
-
 ##################################
 # Important model comparison
 model.comparison(control.unw, full.unw)
 
 
 
+# Alternative to plot fitted vs resid
+plot(full.unw.centered)
+
+
+##################################
+# Important model comparison
+model.comparison(control.centered, full.unw.centered)
+
+
+
 # tab models
-tab_model(baseline.unw,gcselfeff.unw,control.unw, full.unw, show.r2 = FALSE)
-tab_model(baseline.unw,gcselfeff.unw,control.unw, full.unw, show.r2 = FALSE, file = "hlm_unweighted.doc")
+# tab_model(baseline.unw,gcselfeff.unw,control.unw, full.unw, show.r2 = FALSE)
+# tab_model(baseline.unw,gcselfeff.unw,control.unw, full.unw, show.r2 = FALSE, file = "hlm_unweighted.doc")
 
 
 
