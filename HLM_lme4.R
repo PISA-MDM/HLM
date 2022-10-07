@@ -1,9 +1,10 @@
 # HLM unweighted
-
+install.packages("lmerTest")
 
 library(EdSurvey)
 library(lme4)
 library(nlme)
+library(lmerTest)
 library(WeMix)
 library(flexplot) # get statistics for hlm
 library(tidyverse)
@@ -253,7 +254,7 @@ summary(intercept.only)
 # 35893.39 35905.4 -17944.7
 # 
 # Coefficients:
-#   Value Std.Error  t-value p-value
+#                Value Std.Error  t-value  p-value
 # (Intercept) 525.7778  1.792229 293.3653       0
 # 
 # Standardized residuals:
@@ -265,9 +266,12 @@ summary(intercept.only)
 
 
 # Null model
-baseline.unw <- lmer(pv1read ~ 1 + (1|cntschid), data = pisa.sel2,REML = F)
+baseline.unw <- lme4::lmer(pv1read ~ 1 + (1|cntschid), data = pisa.sel2)
 summary(baseline.unw) 
 estimates(baseline.unw) # from flexplot
+
+# Getting p-values from lmerTest
+summary(lmerTest::lmer(pv1read ~ 1 + (1|cntschid), data = pisa.sel2,REML = F))
 
 # tab model with sjPlot
 tab_model(baseline.unw, show.r2 = FALSE) # from sjPlot
@@ -284,10 +288,14 @@ visualize(baseline.unw, sample = 174, plot = "model")
 
 
 # gcselfeff
-gcselfeff.unw <-  lmer(pv1read ~ gcselfeff + (1|cntschid), data = pisa.sel2,REML = F)
+gcselfeff.unw <-  lme4::lmer(pv1read ~ gcselfeff + (1|cntschid), data = pisa.sel2)
 summary(gcselfeff.unw)
 estimates(gcselfeff.unw)
 tab_model(gcselfeff.unw, show.r2 = FALSE)
+
+# Getting p-values from lmerTest
+summary(lmerTest::lmer(pv1read ~ gcselfeff + (1|cntschid), data = pisa.sel2))
+
 
 # Visualize with flexplot
 visualize(gcselfeff.unw,  sample = 174, plot = "model")
@@ -307,10 +315,16 @@ tab_model(baseline.unw,gcselfeff.unw, show.r2 = FALSE)
 # Control variables
 ######################
 # Raw scores of hisei
-control.unw <-  lmer(pv1read ~ progn_de + st001d01t_ad + st004d01t + hisei + avg_hisei + immig + repeatgrade +  sc048q01na + (1|cntschid), 
+control.unw <-  lme4::lmer(pv1read ~ progn_de + st001d01t_ad + st004d01t + hisei + avg_hisei + immig + repeatgrade +  sc048q01na + (1|cntschid), 
                   data = pisa.sel2)
-estimates(control.unw)
+flexplot::estimates(control.unw)
 summary(control.unw)
+
+# Getting p-values from lmerTest
+summary(lmerTest::lmer(pv1read ~ progn_de + st001d01t_ad + st004d01t + hisei + avg_hisei + immig + repeatgrade +  sc048q01na + (1|cntschid), 
+                   data = pisa.sel2))
+
+
 
 # Visualize with flexplot
 #visualize(control.unw, sample = 174)
@@ -327,10 +341,14 @@ model.comparison(baseline.unw,control.unw)
 # group centered hisei
 ######################
 
-control.centered <-  lmer(pv1read ~ progn_de + st001d01t_ad + st004d01t + hisei_gc + avg_hisei + immig + repeatgrade +  sc048q01na + (1|cntschid), 
+control.centered <-  lme4::lmer(pv1read ~ progn_de + st001d01t_ad + st004d01t + hisei_gc + avg_hisei + immig + repeatgrade +  sc048q01na + (1|cntschid), 
                      data = pisa.sel2)
 estimates(control.centered)
 summary(control.centered)
+
+# Getting p-values from lmerTest
+summary(lmerTest::lmer(pv1read ~ progn_de + st001d01t_ad + st004d01t + hisei_gc + avg_hisei + immig + repeatgrade +  sc048q01na + (1|cntschid), 
+                       data = pisa.sel2))
 
 # Alternative to plot fitted vs resid
 plot(control.centered)
@@ -346,11 +364,14 @@ model.comparison(baseline.unw,control.centered)
 # Full models
 ###################
 # Raw scores of hisei
-full.unw <-  lmer(pv1read ~ gcselfeff + progn_de + st001d01t_ad + st004d01t + hisei + avg_hisei + immig + repeatgrade +  sc048q01na + (1|cntschid), 
+full.unw <-  lme4::lmer(pv1read ~ gcselfeff + progn_de + st001d01t_ad + st004d01t + hisei + avg_hisei + immig + repeatgrade +  sc048q01na + (1|cntschid), 
                   data = pisa.sel2)
-estimates(full.unw)
+flexplot::estimates(full.unw)
 summary(full.unw)
 
+# Getting p-values from lmerTest
+summary(lmerTest::lmer(pv1read ~ gcselfeff + progn_de + st001d01t_ad + st004d01t + hisei + avg_hisei + immig + repeatgrade +  sc048q01na + (1|cntschid), 
+                   data = pisa.sel2))
 
 # Alternative to plot fitted vs resid
 plot(full.unw)
@@ -371,6 +392,12 @@ full.unw.centered <-  lmer(pv1read ~ gcselfeff + progn_de + st001d01t_ad + st004
                            data = pisa.sel2)
 estimates(full.unw.centered)
 summary(full.unw.centered)
+
+
+# Getting p-values from lmerTest
+summary(lmerTest::lmer(pv1read ~ gcselfeff + progn_de + st001d01t_ad + st004d01t + hisei_gc + avg_hisei + immig + repeatgrade +  sc048q01na + (1|cntschid), 
+                       data = pisa.sel2))
+
 
 ##################################
 # Important model comparison
