@@ -388,7 +388,7 @@ model.comparison(control.unw, full.unw)
 ######################
 
 # Raw scores of hisei
-full.unw.centered <-  lmer(pv1read ~ gcselfeff + progn_de + st001d01t_ad + st004d01t + hisei_gc + avg_hisei + immig + repeatgrade +  sc048q01na + (1|cntschid), 
+full.unw.centered <-  lme4::lmer(pv1read ~ gcselfeff + progn_de + st001d01t_ad + st004d01t + hisei_gc + avg_hisei + immig + repeatgrade +  sc048q01na + (1|cntschid), 
                            data = pisa.sel2)
 estimates(full.unw.centered)
 summary(full.unw.centered)
