@@ -5,8 +5,8 @@ library(WeMix)
 library(lme4)
 library(tidyverse)
 
-## EdSurvey Regression analyses 
-# In the following section OLS regression (chapter 5.2) will be performed.
+## Weighted Hierarchical linear modelling
+# In the following section weighted HLM (chapter 7) will be performed.
 
 # Download necessary packages if not installed
 list.of.packages <- c("EdSurvey", "lme4","WeMix","flexplot","tidyverse","sjPlot","jtools")
@@ -22,7 +22,7 @@ library(tidyverse)
 #library(sjPlot) # For plotting models only lme4
 #library(jtools) # For plotting models only lme4
 
-# Please make sure data ist downloaded
+# Please make sure data is downloaded
 # Data can be downloaded at https://www.oecd.org/pisa/data/2018database/
 # As an alternative the Edsurvey package provides a download function that will download data for all countries. Thus the download will take some time
 # see help("downloadPISA") for more information
@@ -221,6 +221,9 @@ t <- pisa.sel2 %>% group_by(cntschid) %>% summarize(number_stu = n()) %>% ungrou
 summary(t$number_stu)
 sd(t$number_stu)
 
+# Create level 1 dummy weight
+pisa.sel2$dummywt <- 1
+
 
 ############################################
 #### End of data preparation ##############
@@ -294,26 +297,26 @@ WeMix::waldTest(control.unscaled, type = "beta", coefs = "sc048q01na")
 
 ######################
 # Group centered hisei ###
-control.unscaled.centered <-  mix(pv1read ~ st001d01t_ad + st004d01t + hisei_gc  + immig + repeatgrade + progn_de +  avg_hisei + sc048q01na + (1|cntschid), 
-                         data = pisa.sel2,
-                         weights = c("w_fstuwt","w_schgrnrabwt"))
-
-
-summary(control.unscaled.centered)
-
-WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "st001d01t_adGrade 10-12")
-WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "st004d01tMALE")
-WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "hisei_gc")
-WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "immigSECOND-GENERATION")
-WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "immigFIRST-GENERATION")
-WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "repeatgradeREPEATED A  GRADE")
-WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "progn_deBerufsschule")
-WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "progn_deGymnasium")
-WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "progn_deIntegrierte Gesamtschule")
-WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "progn_deRealschule")
-WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "progn_deSchule mit mehreren Bildungsgängen")
-WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "avg_hisei")
-WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "sc048q01na")
+# control.unscaled.centered <-  mix(pv1read ~ st001d01t_ad + st004d01t + hisei_gc  + immig + repeatgrade + progn_de +  avg_hisei + sc048q01na + (1|cntschid), 
+#                          data = pisa.sel2,
+#                          weights = c("w_fstuwt","w_schgrnrabwt"))
+# 
+# 
+# summary(control.unscaled.centered)
+# 
+# WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "st001d01t_adGrade 10-12")
+# WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "st004d01tMALE")
+# WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "hisei_gc")
+# WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "immigSECOND-GENERATION")
+# WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "immigFIRST-GENERATION")
+# WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "repeatgradeREPEATED A  GRADE")
+# WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "progn_deBerufsschule")
+# WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "progn_deGymnasium")
+# WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "progn_deIntegrierte Gesamtschule")
+# WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "progn_deRealschule")
+# WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "progn_deSchule mit mehreren Bildungsgängen")
+# WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "avg_hisei")
+# WeMix::waldTest(control.unscaled.centered, type = "beta", coefs = "sc048q01na")
 
 
 
@@ -349,31 +352,31 @@ WeMix::waldTest(full.unscalsed, type = "beta", coefs = "sc048q01na")
 
 ######################
 # Group centered hisei ###
-full.unscaled.centered <-  mix(pv1read ~ gcselfeff + st001d01t_ad + st004d01t + hisei_gc  + immig + repeatgrade + progn_de +  avg_hisei + sc048q01na + (1|cntschid), 
-                       data = pisa.sel2,
-                       weights = c("w_fstuwt","w_schgrnrabwt"))
-
-
-summary(full.unscaled.centered)
-
-WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "gcselfeff")
-WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "st001d01t_adGrade 10-12")
-WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "st004d01tMALE")
-WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "hisei_gc")
-WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "immigSECOND-GENERATION")
-WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "immigFIRST-GENERATION")
-WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "repeatgradeREPEATED A  GRADE")
-WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "progn_deBerufsschule")
-WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "progn_deGymnasium")
-WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "progn_deIntegrierte Gesamtschule")
-WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "progn_deRealschule")
-WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "progn_deSchule mit mehreren Bildungsgängen")
-WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "avg_hisei")
-WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "sc048q01na")
-
-
-
-
+# full.unscaled.centered <-  mix(pv1read ~ gcselfeff + st001d01t_ad + st004d01t + hisei_gc  + immig + repeatgrade + progn_de +  avg_hisei + sc048q01na + (1|cntschid), 
+#                        data = pisa.sel2,
+#                        weights = c("w_fstuwt","w_schgrnrabwt"))
+# 
+# 
+# summary(full.unscaled.centered)
+# 
+# WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "gcselfeff")
+# WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "st001d01t_adGrade 10-12")
+# WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "st004d01tMALE")
+# WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "hisei_gc")
+# WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "immigSECOND-GENERATION")
+# WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "immigFIRST-GENERATION")
+# WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "repeatgradeREPEATED A  GRADE")
+# WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "progn_deBerufsschule")
+# WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "progn_deGymnasium")
+# WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "progn_deIntegrierte Gesamtschule")
+# WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "progn_deRealschule")
+# WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "progn_deSchule mit mehreren Bildungsgängen")
+# WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "avg_hisei")
+# WeMix::waldTest(full.unscaled.centered, type = "beta", coefs = "sc048q01na")
+# 
+# 
+# 
+# 
 
 
 #########################################
@@ -444,27 +447,27 @@ WeMix::waldTest(control.wemix, type = "beta", coefs = "sc048q01na")
 
 ######################
 # Group centered hisei ###
-control.wemix.centered <-  mix(pv1read ~ st001d01t_ad + st004d01t + hisei_gc  + immig + repeatgrade + progn_de +  avg_hisei + sc048q01na + (1|cntschid), 
-                      data = pisa.sel2,
-                      weights = c("dummywt","w_schgrnrabwt"), cWeights = T)
-
-
-summary(control.wemix.centered)
-
-WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "st001d01t_adGrade 10-12")
-WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "st004d01tMALE")
-WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "hisei_gc")
-WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "immigSECOND-GENERATION")
-WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "immigFIRST-GENERATION")
-WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "repeatgradeREPEATED A  GRADE")
-WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "progn_deBerufsschule")
-WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "progn_deGymnasium")
-WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "progn_deIntegrierte Gesamtschule")
-WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "progn_deRealschule")
-WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "progn_deSchule mit mehreren Bildungsgängen")
-WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "avg_hisei")
-WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "sc048q01na")
-
+# control.wemix.centered <-  mix(pv1read ~ st001d01t_ad + st004d01t + hisei_gc  + immig + repeatgrade + progn_de +  avg_hisei + sc048q01na + (1|cntschid), 
+#                       data = pisa.sel2,
+#                       weights = c("dummywt","w_schgrnrabwt"), cWeights = T)
+# 
+# 
+# summary(control.wemix.centered)
+# 
+# WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "st001d01t_adGrade 10-12")
+# WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "st004d01tMALE")
+# WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "hisei_gc")
+# WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "immigSECOND-GENERATION")
+# WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "immigFIRST-GENERATION")
+# WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "repeatgradeREPEATED A  GRADE")
+# WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "progn_deBerufsschule")
+# WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "progn_deGymnasium")
+# WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "progn_deIntegrierte Gesamtschule")
+# WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "progn_deRealschule")
+# WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "progn_deSchule mit mehreren Bildungsgängen")
+# WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "avg_hisei")
+# WeMix::waldTest(control.wemix.centered, type = "beta", coefs = "sc048q01na")
+# 
 
 
 
@@ -503,27 +506,27 @@ WeMix::waldTest(full.wemix, type = "beta", coefs = "sc048q01na")
 
 ######################
 # Group centered hisei ###
-
-full.wemix.centered <-  mix(pv1read ~ gcselfeff + st001d01t_ad + st004d01t + hisei_gc  + immig + repeatgrade + progn_de +  avg_hisei + sc048q01na + (1|cntschid), 
-                   data = pisa.sel2,
-                   weights = c("dummywt","w_schgrnrabwt"), cWeights = T)
-
-
-summary(full.wemix.centered)
-
-WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "gcselfeff")
-WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "st001d01t_adGrade 10-12")
-WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "st004d01tMALE")
-WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "hisei_gc")
-WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "immigSECOND-GENERATION")
-WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "immigFIRST-GENERATION")
-WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "repeatgradeREPEATED A  GRADE")
-WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "progn_deBerufsschule")
-WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "progn_deGymnasium")
-WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "progn_deIntegrierte Gesamtschule")
-WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "progn_deRealschule")
-WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "progn_deSchule mit mehreren Bildungsgängen")
-WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "avg_hisei")
-WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "sc048q01na")
+# 
+# full.wemix.centered <-  mix(pv1read ~ gcselfeff + st001d01t_ad + st004d01t + hisei_gc  + immig + repeatgrade + progn_de +  avg_hisei + sc048q01na + (1|cntschid), 
+#                    data = pisa.sel2,
+#                    weights = c("dummywt","w_schgrnrabwt"), cWeights = T)
+# 
+# 
+# summary(full.wemix.centered)
+# 
+# WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "gcselfeff")
+# WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "st001d01t_adGrade 10-12")
+# WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "st004d01tMALE")
+# WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "hisei_gc")
+# WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "immigSECOND-GENERATION")
+# WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "immigFIRST-GENERATION")
+# WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "repeatgradeREPEATED A  GRADE")
+# WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "progn_deBerufsschule")
+# WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "progn_deGymnasium")
+# WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "progn_deIntegrierte Gesamtschule")
+# WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "progn_deRealschule")
+# WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "progn_deSchule mit mehreren Bildungsgängen")
+# WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "avg_hisei")
+# WeMix::waldTest(full.wemix.centered, type = "beta", coefs = "sc048q01na")
 
 
