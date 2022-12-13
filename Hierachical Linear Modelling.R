@@ -1,7 +1,6 @@
 # Hierarchical Linear Modelling (weighted / unweighted)
 # In the following section HLM (chapter 7) will be performed.
 
-
 # Download necessary packages if not installed
 list.of.packages <- c("EdSurvey", "lme4","WeMix","flexplot","tidyverse","sjPlot","jtools")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -216,6 +215,9 @@ length(unique(pisa.sel2$cntschid))
 t <- pisa.sel2 %>% group_by(cntschid) %>% summarize(number_stu = n()) %>% ungroup
 summary(t$number_stu)
 sd(t$number_stu)
+
+# Create dummy weight for school weight only analysis
+pisa.sel2$dummywt <- 1
 
 
 ############################################
