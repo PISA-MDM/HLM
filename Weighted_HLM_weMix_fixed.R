@@ -5,26 +5,40 @@ library(WeMix)
 library(lme4)
 library(tidyverse)
 
+## EdSurvey Regression analyses 
+# In the following section OLS regression (chapter 5.2) will be performed.
+
+# Download necessary packages if not installed
+list.of.packages <- c("EdSurvey", "lme4","WeMix","flexplot","tidyverse","sjPlot","jtools")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
+
+
+library(EdSurvey)
+library(lme4)
+library(WeMix)
+library(flexplot) # get statistics for hlm
+library(tidyverse)
+#library(sjPlot) # For plotting models only lme4
+#library(jtools) # For plotting models only lme4
+
+# Please make sure data ist downloaded
+# Data can be downloaded at https://www.oecd.org/pisa/data/2018database/
+# As an alternative the Edsurvey package provides a download function that will download data for all countries. Thus the download will take some time
+# see help("downloadPISA") for more information
+
 
 #####################################
 # Read data 
 ###################################
 
-# Path needs to be adjusted by user
+# Path needs to be adjusted by user - path needs to be download folder created by EdSurvey function downloadPISA
 sdf <- readPISA(path = "C:/Users/bergm/OneDrive/Dokumente/Applied Data Science/05_Frühjahr 2022/Project Consulting Course/Data/PISA/2018",countries="DEU")
 #sdf <- readPISA(path = "C:/Users/isr/Desktop/Training IPSDS/Master project/pisa2018/data",countries="DEU")
 
 
-global.scales <- c("GCSELFEFF")#Self-efficacy regarding global issues (WLE)
-#  "GCAWARE",#Student's awareness of global issues (WLE)
-# "PERSPECT",#Perspective-taking (WLE)
-#  "COGFLEX",#Cognitive flexibility/adaptability (WLE)
-#  "AWACOM",#Awareness of intercultural communication (WLE)
-#  "INTCULT",#Student's interest in learning about other cultures (WLE)
-#  "RESPECT",#Respect for people from other cultures (WLE)
-#  "GLOBMIND",#Global-mindedness (WLE)
-#  "ATTIMM")
-global.scales <- str_to_lower(global.scales)
+global.scales <- c("GCSELFEFF") #Self-efficacy regarding global issues (WLE)
+global.scales <- str_to_lower(global.scales) # Edsurvey takes variables as lower case letters
 
 pv <- c("PV1READ" , "PV2READ", "PV3READ", "PV4READ", "PV5READ" , "PV6READ", "PV7READ", "PV8READ", "PV9READ" , "PV10READ")
 pv <- str_to_lower(pv)
@@ -43,15 +57,13 @@ control.vars <- c("ST001D01T",#Grade
                   "HISEI",#Highest International Socio-Economic Index of Occupational Status
                   #  "PARED",#Index highest parental education in years of schooling
                   "IMMIG",#Index Immigration status
-                  #  "ST127Q01TA",#Have you ever repeated a <grade>? At <ISCED 1>
-                  #  "ST127Q02TA",#Have you ever repeated a <grade>? At <ISCED 2>
                   "repeatgrade",
                   "progn",  # School classification
                   "SC048Q01NA") # Percentage <national modal grade for 15-year-olds>: Students whose <heritage language> is different from <test language
 
 control.vars <- str_to_lower(control.vars)
 
-### Get Data
+### Get Data and variables defined above
 
 pisa.sel <- EdSurvey::getData(data = sdf,
                               varnames = c(id.vars,wt.vars,global.scales,control.vars,pv),
@@ -61,22 +73,6 @@ pisa.sel <- EdSurvey::getData(data = sdf,
 
 
 
-# Object can be used in EdSurvey functions, if addAttributes = True
-# pisa.sel2 <- EdSurvey::getData(data = sdf,
-#                                varnames = c(id.vars,wt.vars,global.scales,control.vars,pv),
-#                               omittedLevels = F,
-#                               returnJKreplicates = TRUE, # Necessary to make functions work
-#                               addAttributes = T) # dataframe can be used for EdSurvey functions
-
-
-
-############################################
-# Demonstrating difference between pisa.sel & pisa.sel2
-
-# lm.sdf(formula = pv1read ~ gcselfeff, data = pisa.sel) # Does not work without rebinding attribures first
-# m.sdf(formula = pv1read ~ gcselfeff, data = pisa.sel2) # EdSurvey functions can be used, because of  returnJKreplicates = TRUE and  addAttributes = TRUE
-###########################################
-
 
 ############################################
 #### Start of data preparation ##############
@@ -85,6 +81,9 @@ pisa.sel <- EdSurvey::getData(data = sdf,
 
 
 ########### mutate progn -Tatjana ##############
+# Recode progn variable to reflect Germany schooltypes
+# assign numeric characters
+
 attributes(pisa.sel$progn)$levels
 class(pisa.sel$cntschid)
 is.numeric(pisa.sel$progn)
@@ -111,7 +110,7 @@ pisa.sel<- pisa.sel%>%
                                      progn == "GERMANY: VOCATIONAL SCHOOL UPPER SECONDARY LEVEL" ~ "7"))) #Berufsschule
 
 
-# Relevel to baseline 2
+# Relevel to baseline 2 (=Hauptschule)
 pisa.sel$progn_ad <- relevel(pisa.sel$progn_ad, ref="2")
 
 #is progn a factor?
@@ -129,6 +128,7 @@ class(pisa.sel$progn_ad)
 
 
 ### PROGN with German school names
+# Recode progn variable to reflect Germany schooltypes
 
 
 pisa.sel<- pisa.sel%>%
@@ -158,10 +158,12 @@ pisa.sel$progn_de <- relevel(pisa.sel$progn_de, ref="Hauptschule")
 
 
 ####### mutate ST001D01T",#Grade  -  Tatjana #########
+# Dichotomize Grade variable because of small cell sizes
+summary2(sdf, "st001d01t")
+
 pisa.sel<- pisa.sel%>%
-  mutate(#st001d01t = as.numeric(st001d01t),
-    st001d01t_ad = factor(case_when(st001d01t <= 9 ~ "Grade 7-9",
-                                    st001d01t >= 10 ~ "Grade 10-12")))
+  mutate(st001d01t_ad = factor(case_when(st001d01t <= 9 ~ "Grade 7-9",
+                                         st001d01t >= 10 ~ "Grade 10-12")))
 
 # Relevel to baseline Hauptschule
 pisa.sel$st001d01t_ad <- relevel(pisa.sel$st001d01t_ad, ref="Grade 7-9")
@@ -174,26 +176,19 @@ pisa.sel <- pisa.sel %>% group_by(cntschid) %>% mutate(avg_hisei = mean(hisei, n
 
 
 # Check group mean centering
-pisa.hisei <- pisa.sel %>% select(hisei, avg_hisei, hisei_gc)
+#pisa.sel %>% select(hisei, avg_hisei, hisei_gc)
 
 # Show school average hisei
 pisa.sel %>% 
   group_by(cntschid) %>% 
   summarise(avg_hisei = mean(hisei, na.rm = TRUE)) %>% ungroup
 
+
 ##########################################################
 ######### Rebinding attributes to use EdSurvey functions
 ##########################################################
 pisa.sel <- rebindAttributes(pisa.sel, sdf)
 
-
-#############################################
-# Test - get summary statistics for new variables
-
-summary2(data = pisa.sel, variable = "progn_de")
-summary2(data = pisa.sel, variable = "st001d01t_ad")
-summary2(data = pisa.sel, variable = "avg_hisei")
-# EdSurvey functions work fine
 
 
 ##################################
@@ -219,7 +214,7 @@ full.cases <- pisa.sel2
 length(full.cases$cntstuid) # 2989 obs
 
 # Number of schools
-length(unique(pisa.sel2$cntschid)) # 174 schools
+length(unique(pisa.sel2$cntschid))
 
 # Descriptive statistics of full cases
 t <- pisa.sel2 %>% group_by(cntschid) %>% summarize(number_stu = n()) %>% ungroup
@@ -227,15 +222,12 @@ summary(t$number_stu)
 sd(t$number_stu)
 
 
-# Create dummywt for HLM
-pisa.sel2$dummywt <- 1
-
-
-
-
 ############################################
 #### End of data preparation ##############
 ###########################################
+
+
+
 
 
 ###########################################
